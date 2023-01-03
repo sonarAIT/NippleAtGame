@@ -15,12 +15,24 @@ module.exports = (sequelize, DataTypes) => {
         {
             name: {
                 type: DataTypes.STRING,
-                allowNull: false,
-                unique: true,
+                unique: {
+                    msg: "このユーザー名は既に使われています。",
+                },
+                validate: {
+                    len: {
+                        args: [1, 32],
+                        msg: "ユーザー名は1文字以上32文字以下で入力して下さい。",
+                    },
+                }
             },
             pass: {
                 type: DataTypes.STRING,
-                allowNull: false,
+                validate: {
+                    len: {
+                        args: [1, 32],
+                        msg: "パスワードは1文字以上32文字以下で入力して下さい。",
+                    },
+                }
             },
         },
         {

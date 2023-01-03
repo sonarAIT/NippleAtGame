@@ -26,19 +26,15 @@ module.exports = (sequelize, DataTypes) => {
         {
             leftNippleX: {
                 type: DataTypes.DOUBLE,
-                allowNull: false,
             },
             leftNippleY: {
                 type: DataTypes.DOUBLE,
-                allowNull: false,
             },
             rightNippleX: {
                 type: DataTypes.DOUBLE,
-                allowNull: false,
             },
             rightNippleY: {
                 type: DataTypes.DOUBLE,
-                allowNull: false,
             },
         },
         {

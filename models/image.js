@@ -15,7 +15,6 @@ module.exports = (sequelize, DataTypes) => {
         {
             path: {
                 type: DataTypes.STRING,
-                allowNull: false,
             },
         },
         {

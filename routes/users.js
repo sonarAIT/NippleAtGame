@@ -4,8 +4,6 @@ const db = require("../models/index");
 
 function isLoggined(req, res) {
     if (req.session.login == null) {
-        req.session.back = "/users/";
-        res.redirect("/users/login");
         return false;
     } else {
         return true;
@@ -13,7 +11,7 @@ function isLoggined(req, res) {
 }
 
 router.get("/", (req, res, next) => {
-    res.redirect("/users/mypage/0");
+    res.redirect("/users/mypage/");
 });
 
 router.get("/mypage", (req, res, next) => {
@@ -21,14 +19,17 @@ router.get("/mypage", (req, res, next) => {
 });
 
 router.get("/mypage/:page", (req, res, next) => {
-    if (!isLoggined(req, res)) return;
+    if (!isLoggined(req, res)) {
+        res.redirect("/users/login");
+        return;
+    }
 
     const data = {
         user: {
             id: req.session.login.id,
             name: req.session.login.name,
-        }
-    }
+        },
+    };
 
     res.render("users/mypage", data);
 });
@@ -41,7 +42,6 @@ router.get("/login", (req, res, next) => {
 });
 
 router.post("/login", (req, res, next) => {
-    console.log(req.session);
     db.User.findOne({
         where: {
             name: req.body.name,
@@ -51,11 +51,7 @@ router.post("/login", (req, res, next) => {
         .then((user) => {
             if (user != null) {
                 req.session.login = user;
-                const back = req.session.back;
-                if (back == null) {
-                    back = "/users/mypage";
-                }
-                res.redirect(back);
+                res.redirect("/users/mypage");
             } else {
                 const data = {
                     content:
@@ -67,6 +63,34 @@ router.post("/login", (req, res, next) => {
         .catch((err) => {
             console.log(err);
         });
+});
+
+router.get("/create", (req, res, next) => {
+    const data = {
+        form: new db.User(),
+        err: null,
+    };
+    res.render("users/create", data);
+});
+
+router.post("/create", (req, res, next) => {
+    const form = {
+        name: req.body.name,
+        pass: req.body.pass,
+    };
+    db.sequelize.sync().then(() =>
+        db.User.create(form)
+            .then((usr) => {
+                res.redirect("/users/mypage");
+            })
+            .catch((err) => {
+                const data = {
+                    form: form,
+                    err: err,
+                };
+                res.render("users/create", data);
+            })
+    );
 });
 
 module.exports = router;
