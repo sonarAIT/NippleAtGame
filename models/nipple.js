@@ -14,12 +14,6 @@ module.exports = (sequelize, DataTypes) => {
                 onUpdate: "CASCADE",
                 allowNull: false,
             });
-            Nipple.belongsTo(models.User, {
-                foreignKey: "userID",
-                onDelete: "CASCADE",
-                onUpdate: "CASCADE",
-                allowNull: false,
-            });
         }
     }
     Nipple.init(
