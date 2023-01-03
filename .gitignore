@@ -105,3 +105,6 @@ dist
 
 # db
 *.sqlite3
+public/images/
+
+.DS_Store
