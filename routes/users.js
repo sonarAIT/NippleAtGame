@@ -2,14 +2,6 @@ const express = require("express");
 const router = express.Router();
 const db = require("../models/index");
 
-function isLoggined(req, res) {
-    if (req.session.login == null) {
-        return false;
-    } else {
-        return true;
-    }
-}
-
 router.get("/", (req, res, next) => {
     res.redirect("/users/mypage/");
 });
@@ -19,7 +11,7 @@ router.get("/mypage", (req, res, next) => {
 });
 
 router.get("/mypage/:page", (req, res, next) => {
-    if (!isLoggined(req, res)) {
+    if (!module.exports.isLoggined(req, res)) {
         res.redirect("/users/login");
         return;
     }
@@ -94,7 +86,7 @@ router.post("/create", (req, res, next) => {
 });
 
 router.get("/delete", (req, res, next) => {
-    if (!isLoggined(req, res)) {
+    if (!module.exports.isLoggined(req, res)) {
         res.redirect("/users/login");
         return;
     }
@@ -116,3 +108,11 @@ router.get("/delete/complete", (req, res, next) => {
 });
 
 module.exports = router;
+
+module.exports.isLoggined = (req, res) => {
+    if (req.session.login == null) {
+        return false;
+    } else {
+        return true;
+    }
+};
