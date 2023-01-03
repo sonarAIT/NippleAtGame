@@ -1,0 +1,22 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta http-equiv="content-type" content="text/html"; charset="UTF-8">
+    <title>マイページ</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" crossorigin="anonymous">
+    <link rel='stylesheet' href='/stylesheets/style.css' />
+</head>
+<body class="container">
+    <header>
+        <h1 class="display-4">マイページ</h1>
+    </header>
+    <div role="main">
+        <table class="table">
+                <tr>
+                    <th><%= user.id %></th>
+                    <td><%= user.name %></td>
+                </tr>
+        </table>
+    </div>
+</body>
+</html>
