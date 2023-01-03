@@ -9,6 +9,7 @@ var session = require('express-session');
 /* ルート用モジュール(.js)のダウンロード */
 var indexRouter = require('./routes/index');
 var usersRouter = require('./routes/users');
+var nippleRouter = require('./routes/nipple');
 
 /* Expressオブジェクトの作成と基本設定（テンプレート関係の設定） */
 var app = express();
@@ -34,6 +35,7 @@ app.use(session(session_opt));
 /* アクセスのためのapp.useを作成 */
 app.use('/', indexRouter);
 app.use('/users', usersRouter);
+app.use('/nipple', nippleRouter);
 
 /* その他のアクセス処理 */
 app.use(function(req, res, next) {
