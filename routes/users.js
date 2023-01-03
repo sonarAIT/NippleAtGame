@@ -93,4 +93,19 @@ router.post("/create", (req, res, next) => {
     );
 });
 
+router.get("/delete", (req, res, next) => {
+    if (!isLoggined(req, res)) {
+        res.redirect("/users/login");
+        return;
+    }
+
+    res.render("users/delete");
+});
+
+router.post("/delete", (req, res, next) => {
+    db.User.findByPk(req.session.login.id).then((user) => {
+        user.destroy().then(() => res.redirect("/users/login"));
+    });
+});
+
 module.exports = router;
