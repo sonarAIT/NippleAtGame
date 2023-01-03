@@ -104,8 +104,15 @@ router.get("/delete", (req, res, next) => {
 
 router.post("/delete", (req, res, next) => {
     db.User.findByPk(req.session.login.id).then((user) => {
-        user.destroy().then(() => res.redirect("/users/login"));
+        user.destroy().then(() => {
+            req.session.login = null;
+            res.redirect("/users/delete/complete")
+        });
     });
+});
+
+router.get("/delete/complete", (req, res, next) => {
+    res.render("users/delete-complete");
 });
 
 module.exports = router;
