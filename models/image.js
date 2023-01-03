@@ -9,7 +9,7 @@ module.exports = (sequelize, DataTypes) => {
          */
         static associate(models) {
             Image.hasOne(models.Nipple);
-            Nipple.belongsTo(models.User, {
+            Image.belongsTo(models.User, {
                 foreignKey: "userID",
                 onDelete: "CASCADE",
                 onUpdate: "CASCADE",
