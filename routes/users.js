@@ -9,11 +9,13 @@ router.get("/", (req, res, next) => {
     res.redirect("/users/mypage/");
 });
 
-router.get("/mypage", (req, res, next) => {
-    res.redirect("/users/mypage/0");
-});
-
-router.get("/mypage/:page", (req, res, next) => {
+function imagesPageResponder(
+    req,
+    res,
+    countQuery,
+    imagesQuery,
+    pageDifference
+) {
     if (!module.exports.isLoggined(req, res)) {
         res.redirect("/users/login");
         return;
@@ -27,18 +29,18 @@ router.get("/mypage/:page", (req, res, next) => {
 
     let nippleCount = 0;
     sequelize
-        .query(
-            "SELECT COUNT(*) as count from IMAGES WHERE userID = :userID AND EXISTS (SELECT * FROM NIPPLES WHERE NIPPLES.imageID = IMAGES.id)",
-            {
-                replacements: {
-                    userID: req.session.login.id,
-                },
-            }
-        )
+        .query(countQuery, {
+            replacements: {
+                userID: req.session.login.id,
+            },
+        })
         .then((count) => {
             nippleCount = count[0][0].count;
-            if(nippleCount < page * NIPPLE_QUANTITY_PER_PAGE) {
-                const lastPage = Math.max(Math.floor((nippleCount - 1) / NIPPLE_QUANTITY_PER_PAGE), 0);
+            if (nippleCount < page * NIPPLE_QUANTITY_PER_PAGE) {
+                const lastPage = Math.max(
+                    Math.floor((nippleCount - 1) / NIPPLE_QUANTITY_PER_PAGE),
+                    0
+                );
                 res.redirect("/users/mypage/" + lastPage);
                 return;
             }
@@ -48,33 +50,68 @@ router.get("/mypage/:page", (req, res, next) => {
         });
 
     sequelize
-        .query(
-            "SELECT id, path from IMAGES WHERE userID = :userID AND EXISTS (SELECT * FROM NIPPLES WHERE NIPPLES.imageID = IMAGES.id) ORDER BY createdAt LIMIT :limit OFFSET :offset",
-            {
-                replacements: {
-                    userID: req.session.login.id,
-                    offset: page * NIPPLE_QUANTITY_PER_PAGE,
-                    limit: NIPPLE_QUANTITY_PER_PAGE,
-                },
-            }
-        )
+        .query(imagesQuery, {
+            replacements: {
+                userID: req.session.login.id,
+                offset: page * NIPPLE_QUANTITY_PER_PAGE,
+                limit: NIPPLE_QUANTITY_PER_PAGE,
+            },
+        })
         .then((images) => {
-            const isNextPage = nippleCount > (page + 1) * NIPPLE_QUANTITY_PER_PAGE;
+            const isNextPage =
+                nippleCount > (page + 1) * NIPPLE_QUANTITY_PER_PAGE;
             const data = {
                 images: images[0],
                 login: req.session.login,
                 page: page,
                 isNextPage: isNextPage,
+                pageDifference: pageDifference,
             };
             res.render("users/mypage", data);
         })
         .catch((err) => {
             console.log(err);
         });
+}
+
+router.get("/mypage", (req, res, next) => {
+    res.redirect("/users/mypage/0");
+});
+
+router.get("/mypage/:page", (req, res, next) => {
+    const countQuery =
+        "SELECT COUNT(*) as count from IMAGES WHERE userID = :userID AND EXISTS (SELECT * FROM NIPPLES WHERE NIPPLES.imageID = IMAGES.id)";
+    const imagesQuery =
+        "SELECT id, path from IMAGES WHERE userID = :userID AND EXISTS (SELECT * FROM NIPPLES WHERE NIPPLES.imageID = IMAGES.id) ORDER BY createdAt LIMIT :limit OFFSET :offset";
+    const pageDifference = {
+        pageName: "マイページ",
+        centerLink: "/users/nolocate/",
+        centerLinkContext: "乳首座標未登録の画像一覧",
+        locateButtonContext: "乳首座標再登録",
+    };
+    imagesPageResponder(req, res, countQuery, imagesQuery, pageDifference);
+});
+
+router.get("/nolocate", (req, res, next) => {
+    res.redirect("/users/nolocate/0");
+});
+
+router.get("/nolocate/:page", (req, res, next) => {
+    const countQuery =
+        "SELECT COUNT(*) as count from IMAGES WHERE userID = :userID AND NOT EXISTS (SELECT * FROM NIPPLES WHERE NIPPLES.imageID = IMAGES.id)";
+    const imagesQuery =
+        "SELECT id, path from IMAGES WHERE userID = :userID AND NOT EXISTS (SELECT * FROM NIPPLES WHERE NIPPLES.imageID = IMAGES.id) ORDER BY createdAt LIMIT :limit OFFSET :offset";
+    const pageDifference = {
+        pageName: "乳首座標未登録の画像一覧",
+        centerLink: "/users/mypage/",
+        centerLinkContext: "マイページ",
+        locateButtonContext: "乳首座標登録",
+    };
+    imagesPageResponder(req, res, countQuery, imagesQuery, pageDifference);
 });
 
 router.get("/login", (req, res, next) => {
-    if(module.exports.isLoggined(req, res)) {
+    if (module.exports.isLoggined(req, res)) {
         res.redirect("/users/mypage");
         return;
     }

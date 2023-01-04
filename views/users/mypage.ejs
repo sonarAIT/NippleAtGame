@@ -3,7 +3,7 @@
 
 <head>
     <meta http-equiv="content-type" content="text/html" ; charset="UTF-8">
-    <title>マイページ</title>
+    <title><%= pageDifference.pageName %></title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
         crossorigin="anonymous">
     <link rel='stylesheet' href='/stylesheets/style.css' />
@@ -11,14 +11,14 @@
 
 <body>
     <header>
-        <h1 class="display-4">マイページ</h1>
+        <h1 class="display-4"><%= pageDifference.pageName %></h1>
         <h3 class="display-5">
             <%= login.name %>さん ようこそ！
         </h3>
     </header>
     <div role="main">
         <a href="/nipple/upload">&lt;&lt; 新規乳首投稿</a> |
-        <a href="/nipple/">乳首座標未登録の画像一覧</a> |
+        <a href="<%= pageDifference.centerLink %>"><%= pageDifference.centerLinkContext %></a> |
         <a href="/users/delete">アカウント削除&gt;&gt;</a>
 
         <table class="table mt-5 container">
@@ -34,7 +34,7 @@
             </thead>
             <tbody>
                 <% for (let i in images) { %>
-                    <%- include('data_item', {image: images[i], idx: i}) %>
+                    <%- include('data_item', {image: images[i]}) %>
                 <% } %>
             </tbody>
         </table>
