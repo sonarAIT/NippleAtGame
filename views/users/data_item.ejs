@@ -1,0 +1,15 @@
+<% if (image !=null) { %>
+    <tr class="row">
+        <th class="col-4 col-md-3 d-flex justify-content-center">
+            <img src="<%= image.path %>" class="img-thumbnail w-50">
+        </th>
+        <td class="col-8 col-md-4 d-flex justify-content-center align-items-center">
+            <form method=POST action="/users/login" class="mr-3">
+                <input type="submit" class="btn btn-secondary" value="乳首座標更新">
+            </form>
+            <form method=POST action="/users/login">
+                <input type="submit" class="btn btn-secondary" value="削除">
+            </form>
+        </td>
+    </tr>
+<% } %>

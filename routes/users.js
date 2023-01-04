@@ -1,6 +1,9 @@
 const express = require("express");
 const router = express.Router();
 const db = require("../models/index");
+const { sequelize } = require("../models/index");
+
+const NIPPLE_QUANTITY_PER_PAGE = 2;
 
 router.get("/", (req, res, next) => {
     res.redirect("/users/mypage/");
@@ -16,17 +19,65 @@ router.get("/mypage/:page", (req, res, next) => {
         return;
     }
 
-    const data = {
-        user: {
-            id: req.session.login.id,
-            name: req.session.login.name,
-        },
-    };
+    const page = req.params.page * 1;
+    if (isNaN(page) || page < 0) {
+        res.redirect("/users/mypage/0");
+        return;
+    }
 
-    res.render("users/mypage", data);
+    let nippleCount = 0;
+    sequelize
+        .query(
+            "SELECT COUNT(*) as count from IMAGES WHERE userID = :userID AND EXISTS (SELECT * FROM NIPPLES WHERE NIPPLES.imageID = IMAGES.id)",
+            {
+                replacements: {
+                    userID: req.session.login.id,
+                },
+            }
+        )
+        .then((count) => {
+            nippleCount = count[0][0].count;
+            if(nippleCount < page * NIPPLE_QUANTITY_PER_PAGE) {
+                const lastPage = Math.max(Math.floor((nippleCount - 1) / NIPPLE_QUANTITY_PER_PAGE), 0);
+                res.redirect("/users/mypage/" + lastPage);
+                return;
+            }
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+
+    sequelize
+        .query(
+            "SELECT id, path from IMAGES WHERE userID = :userID AND EXISTS (SELECT * FROM NIPPLES WHERE NIPPLES.imageID = IMAGES.id) ORDER BY createdAt LIMIT :limit OFFSET :offset",
+            {
+                replacements: {
+                    userID: req.session.login.id,
+                    offset: page * NIPPLE_QUANTITY_PER_PAGE,
+                    limit: NIPPLE_QUANTITY_PER_PAGE,
+                },
+            }
+        )
+        .then((images) => {
+            const isNextPage = nippleCount > (page + 1) * NIPPLE_QUANTITY_PER_PAGE;
+            const data = {
+                images: images[0],
+                login: req.session.login,
+                page: page,
+                isNextPage: isNextPage,
+            };
+            res.render("users/mypage", data);
+        })
+        .catch((err) => {
+            console.log(err);
+        });
 });
 
 router.get("/login", (req, res, next) => {
+    if(module.exports.isLoggined(req, res)) {
+        res.redirect("/users/mypage");
+        return;
+    }
     const data = {
         content: "名前とパスワードを入力して下さい。",
     };
@@ -98,7 +149,7 @@ router.post("/delete", (req, res, next) => {
     db.User.findByPk(req.session.login.id).then((user) => {
         user.destroy().then(() => {
             req.session.login = null;
-            res.redirect("/users/delete/complete")
+            res.redirect("/users/delete/complete");
         });
     });
 });

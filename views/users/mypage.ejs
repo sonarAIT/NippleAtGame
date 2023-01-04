@@ -1,22 +1,57 @@
 <!DOCTYPE html>
 <html lang="ja">
+
 <head>
-    <meta http-equiv="content-type" content="text/html"; charset="UTF-8">
+    <meta http-equiv="content-type" content="text/html" ; charset="UTF-8">
     <title>マイページ</title>
-    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+        crossorigin="anonymous">
     <link rel='stylesheet' href='/stylesheets/style.css' />
 </head>
-<body class="container">
+
+<body>
     <header>
         <h1 class="display-4">マイページ</h1>
+        <h3 class="display-5">
+            <%= login.name %>さん ようこそ！
+        </h3>
     </header>
     <div role="main">
-        <table class="table">
-                <tr>
-                    <th><%= user.id %></th>
-                    <td><%= user.name %></td>
+        <a href="/nipple/upload">&lt;&lt; 新規乳首投稿</a> |
+        <a href="/nipple/">乳首座標未登録の画像一覧</a> |
+        <a href="/users/delete">アカウント削除&gt;&gt;</a>
+
+        <table class="table mt-5 container">
+            <thead>
+                <tr class="row">
+                    <th class="col-4 col-md-3 d-flex justify-content-center">
+                        <span class="">サムネイル</span>
+                    </th>
+                    <th class="col-8 col-md-4 d-flex justify-content-center">
+                        <span class="">操作</span>
+                    </th>
                 </tr>
+            </thead>
+            <tbody>
+                <% for (let i in images) { %>
+                    <%- include('data_item', {image: images[i], idx: i}) %>
+                <% } %>
+            </tbody>
         </table>
+
+        <ul class="pagination justify-content-center">
+            <% if (page > 0) { %>
+                <li class="page-item">
+                    <a href="/users/mypage/<%= page-1 %>" class="page-link">&lt;&lt; prev</a>
+                </li>
+            <% } %>
+            <% if (isNextPage) { %>
+                <li class="page-item">
+                    <a href="/users/mypage/<%= page+1 %>" class="page-link">Next &gt;&gt;</a>
+                </li>
+            <% } %>
+        </ul>
     </div>
 </body>
+
 </html>
