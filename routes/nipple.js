@@ -12,13 +12,8 @@ const storage = multer.diskStorage({
     },
     filename: function (req, file, cb) {
         const uniqueSuffix = Date.now() + "-" + Math.round(Math.random() * 1e9);
-        const filename =
-            uniqueSuffix +
-            path.extname(file.originalname);
-        cb(
-            null,
-            filename
-        );
+        const filename = uniqueSuffix + path.extname(file.originalname);
+        cb(null, filename);
     },
 });
 
@@ -55,7 +50,12 @@ router.get("/upload", (req, res, next) => {
 });
 
 router.post("/upload", upload.single("image"), function (req, res) {
-    if(req.file === undefined) {
+    if (!users.isLoggined(req, res)) {
+        res.redirect("/users/login");
+        return;
+    }
+
+    if (req.file === undefined) {
         const data = {
             err: "画像ファイル以外はアップロードできません。",
         };
@@ -68,8 +68,74 @@ router.post("/upload", upload.single("image"), function (req, res) {
     db.Image.create({
         path: filePath,
         userID: req.session.login.id,
-    });
-    res.json({ result: "success!" });
+    })
+        .then((image) => {
+            req.session.image = image;
+            res.redirect("/nipple/location");
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+});
+
+router.get("/location", (req, res, next) => {
+    if (!users.isLoggined(req, res)) {
+        res.redirect("/users/login");
+        return;
+    }
+
+    if (req.session.image === undefined) {
+        res.redirect("/nipple/upload");
+        return;
+    }
+
+    const data = {
+        err: null,
+        photoPath: req.session.image.path,
+    };
+
+    res.render("nipple/location", data);
+});
+
+router.post("/location", (req, res, next) => {
+    if (!users.isLoggined(req, res)) {
+        res.redirect("/users/login");
+        return;
+    }
+
+    if (req.session.image === undefined) {
+        res.redirect("/nipple/upload");
+        return;
+    }
+
+    if (
+        req.body.leftNippleX === "" ||
+        req.body.leftNippleY === "" ||
+        req.body.rightNippleX === "" ||
+        req.body.rightNippleY === ""
+    ) {
+        const data = {
+            err: "両乳首を入力してください。",
+            photoPath: req.session.image.path,
+        };
+        res.render("nipple/location", data);
+        return;
+    }
+
+    db.Nipple.create({
+        leftNippleX: req.body.leftNippleX,
+        leftNippleY: req.body.leftNippleY,
+        rightNippleX: req.body.rightNippleX,
+        rightNippleY: req.body.rightNippleY,
+        imageID: req.session.image.id,
+    })
+        .then((nipple) => {
+            req.session.image = undefined;
+            res.redirect("/users/mypage");
+        })
+        .catch((err) => {
+            console.log(err);
+        });
 });
 
 module.exports = router;
