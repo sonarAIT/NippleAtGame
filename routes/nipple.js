@@ -36,7 +36,7 @@ const upload = multer({
     },
 });
 
-function LocationPageResponder(req, res, pageDifference) {
+function redirectOnLocationPageRequestMiss(req, res) {
     if (!users.isLoggined(req)) {
         res.redirect("/users/login");
         return;
@@ -46,7 +46,9 @@ function LocationPageResponder(req, res, pageDifference) {
         res.redirect("/nipple/upload");
         return;
     }
+}
 
+function LocationPageResponder(req, res, pageDifference) {
     const data = {
         err: null,
         photoPath: req.session.image.path,
@@ -74,6 +76,7 @@ function redirectOnNippleDataMiss(req, res, pageDifference) {
         req.body.rightNippleY === ""
     ) {
         // このエラーが発生している時点で新規投稿であることは確約されている。
+        // これで対処できなくなった場合は、redirectを実行するラムダ式を返すようにredirectOnNippleDataMissを変更し、pageDifferenceを引数に渡す。
         const pageDifference = {
             nipple: {
                 leftX: null,
@@ -137,6 +140,8 @@ router.post("/upload", upload.single("image"), function (req, res) {
 });
 
 router.get("/location", (req, res, next) => {
+    redirectOnLocationPageRequestMiss(req, res);
+
     const pageDifference = {
         nipple: {
             leftX: null,
@@ -151,10 +156,7 @@ router.get("/location", (req, res, next) => {
 });
 
 router.get("/location/update", (req, res, next) => {
-    if (!users.isLoggined(req)) {
-        res.redirect("/users/login");
-        return;
-    }
+    redirectOnLocationPageRequestMiss(req, res);
 
     db.Nipple.findOne({
         where: {
