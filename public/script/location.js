@@ -6,9 +6,22 @@ class Point {
 }
 
 class Nipple {
-    constructor() {
-        this.leftNipple = null;
-        this.rightNipple = null;
+    constructor(form) {
+        this.leftNipple = new Point(
+            form.getLeftNippleX(),
+            form.getLeftNippleY()
+        );
+        if (this.leftNipple.x == 0 && this.leftNipple.y == 0) {
+            this.leftNipple = null;
+        }
+        
+        this.rightNipple = new Point(
+            form.getRightNippleX(),
+            form.getRightNippleY()
+        );
+        if (this.rightNipple.x == 0 && this.rightNipple.y == 0) {
+            this.rightNipple = null;
+        }
     }
 
     setLeftNipple(point) {
@@ -70,6 +83,22 @@ class Form {
     setRightNippleY(value) {
         this.rightNippleY.value = value;
     }
+
+    getLeftNippleX() {
+        return this.leftNippleX.value;
+    }
+
+    getLeftNippleY() {
+        return this.leftNippleY.value;
+    }
+
+    getRightNippleX() {
+        return this.rightNippleX.value;
+    }
+
+    getRightNippleY() {
+        return this.rightNippleY.value;
+    }
 }
 
 class ScreenDrawer {
@@ -89,7 +118,7 @@ class ScreenDrawer {
         const drawProcess = () => {
             this.drawPhoto(ctx);
             this.drawNipplePoint(ctx, nipple);
-        }
+        };
         // if image is not loaded, wait for loading
         if (!this.img.complete) {
             this.img.onload = () => {
@@ -100,7 +129,7 @@ class ScreenDrawer {
         // if image is loaded, draw
         drawProcess();
     }
-    
+
     drawPhoto(ctx) {
         const height = canvas.height;
         const width = this.img.width * (height / this.img.height);
@@ -173,7 +202,7 @@ class Main {
         // init
         const canvas = new Canvas(this.canvasWidth, this.canvasHeight);
         const form = new Form();
-        const nipple = new Nipple();
+        const nipple = new Nipple(form);
 
         // set click handler
         const clickHandler = new ClickHandler();

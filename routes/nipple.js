@@ -36,8 +36,66 @@ const upload = multer({
     },
 });
 
+function LocationPageResponder(req, res, pageDifference) {
+    if (!users.isLoggined(req)) {
+        res.redirect("/users/login");
+        return;
+    }
+
+    if (req.session.image === undefined) {
+        res.redirect("/nipple/upload");
+        return;
+    }
+
+    const data = {
+        err: null,
+        photoPath: req.session.image.path,
+        pageDifference: pageDifference,
+    };
+
+    res.render("nipple/location", data);
+}
+
+function redirectOnNippleDataMiss(req, res, pageDifference) {
+    if (!users.isLoggined(req)) {
+        res.redirect("/users/login");
+        return;
+    }
+
+    if (req.session.image === undefined) {
+        res.redirect("/nipple/upload");
+        return;
+    }
+
+    if (
+        req.body.leftNippleX === "" ||
+        req.body.leftNippleY === "" ||
+        req.body.rightNippleX === "" ||
+        req.body.rightNippleY === ""
+    ) {
+        // このエラーが発生している時点で新規投稿であることは確約されている。
+        const pageDifference = {
+            nipple: {
+                leftX: null,
+                leftY: null,
+                rightX: null,
+                rightY: null,
+            },
+            pageName: "乳首新規投稿",
+            method: "POST",
+        };
+        const data = {
+            err: "両乳首を入力してください。",
+            photoPath: req.session.image.path,
+            pageDifference: pageDifference,
+        };
+        res.render("nipple/location", data);
+        return;
+    }
+}
+
 router.get("/upload", (req, res, next) => {
-    if (!users.isLoggined(req, res)) {
+    if (!users.isLoggined(req)) {
         res.redirect("/users/login");
         return;
     }
@@ -50,7 +108,7 @@ router.get("/upload", (req, res, next) => {
 });
 
 router.post("/upload", upload.single("image"), function (req, res) {
-    if (!users.isLoggined(req, res)) {
+    if (!users.isLoggined(req)) {
         res.redirect("/users/login");
         return;
     }
@@ -79,48 +137,45 @@ router.post("/upload", upload.single("image"), function (req, res) {
 });
 
 router.get("/location", (req, res, next) => {
-    if (!users.isLoggined(req, res)) {
+    const pageDifference = {
+        nipple: {
+            leftX: null,
+            leftY: null,
+            rightX: null,
+            rightY: null,
+        },
+        pageName: "乳首新規投稿",
+        postLink: "/nipple/location",
+    };
+    LocationPageResponder(req, res, pageDifference);
+});
+
+router.get("/location/update", (req, res, next) => {
+    if (!users.isLoggined(req)) {
         res.redirect("/users/login");
         return;
     }
 
-    if (req.session.image === undefined) {
-        res.redirect("/nipple/upload");
-        return;
-    }
-
-    const data = {
-        err: null,
-        photoPath: req.session.image.path,
-    };
-
-    res.render("nipple/location", data);
+    db.Nipple.findOne({
+        where: {
+            imageID: req.session.image.id,
+        },
+    })
+        .then((nipple) => {
+            const pageDifference = {
+                nipple: nipple,
+                pageName: "乳首座標更新",
+                postLink: "/nipple/location/update",
+            };
+            LocationPageResponder(req, res, pageDifference);
+        })
+        .catch((err) => {
+            console.log(err);
+        });
 });
 
 router.post("/location", (req, res, next) => {
-    if (!users.isLoggined(req, res)) {
-        res.redirect("/users/login");
-        return;
-    }
-
-    if (req.session.image === undefined) {
-        res.redirect("/nipple/upload");
-        return;
-    }
-
-    if (
-        req.body.leftNippleX === "" ||
-        req.body.leftNippleY === "" ||
-        req.body.rightNippleX === "" ||
-        req.body.rightNippleY === ""
-    ) {
-        const data = {
-            err: "両乳首を入力してください。",
-            photoPath: req.session.image.path,
-        };
-        res.render("nipple/location", data);
-        return;
-    }
+    redirectOnNippleDataMiss(req, res);
 
     db.Nipple.create({
         leftNippleX: req.body.leftNippleX,
@@ -131,6 +186,33 @@ router.post("/location", (req, res, next) => {
     })
         .then((nipple) => {
             req.session.image = undefined;
+            req.session.alertMessage = "乳首登録完了！";
+            res.redirect("/users/mypage");
+        })
+        .catch((err) => {
+            console.log(err);
+        });
+});
+
+router.post("/location/update", (req, res, next) => {
+    redirectOnNippleDataMiss(req, res);
+
+    db.Nipple.update(
+        {
+            leftNippleX: req.body.leftNippleX,
+            leftNippleY: req.body.leftNippleY,
+            rightNippleX: req.body.rightNippleX,
+            rightNippleY: req.body.rightNippleY,
+        },
+        {
+            where: {
+                imageID: req.session.image.id,
+            },
+        }
+    )
+        .then((nipple) => {
+            req.session.image = undefined;
+            req.session.alertMessage = "乳首更新完了！";
             res.redirect("/users/mypage");
         })
         .catch((err) => {

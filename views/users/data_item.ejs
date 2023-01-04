@@ -4,11 +4,14 @@
             <img src="<%= image.path %>" class="img-thumbnail w-50">
         </th>
         <td class="col-8 col-md-4 d-flex justify-content-center align-items-center">
-            <form method=POST action="/users/login" class="mr-3">
+            <form method=POST action="<%= pageDifference.locateButtonLink %>" class="mr-3">
+                <input type="text" name="imageID" value="<%= image.id %>" hidden>
                 <input type="submit" class="btn btn-secondary" value="<%= pageDifference.locateButtonContext %>">
             </form>
-            <form method=POST action="/users/login">
-                <input type="submit" class="btn btn-secondary" value="削除">
+            <% let deleteButtonID="delete-form-" + image.id %>
+            <form id="<%= deleteButtonID %>" method=POST action="/users/mypage/delete">
+                <input type="text" name="imageID" value="<%= image.id %>" hidden>
+                <input type="button" class="btn btn-secondary" onclick="nippleDeleteConfirm('<%= image.id %>')" value="削除">
             </form>
         </td>
     </tr>

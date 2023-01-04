@@ -7,6 +7,7 @@
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
         crossorigin="anonymous">
     <link rel='stylesheet' href='/stylesheets/style.css' />
+    <script src="/script/nipple-delete-confirm.js"></script>
 </head>
 
 <body>
@@ -21,23 +22,33 @@
         <a href="<%= pageDifference.centerLink %>"><%= pageDifference.centerLinkContext %></a> |
         <a href="/users/delete">アカウント削除&gt;&gt;</a>
 
-        <table class="table mt-5 container">
-            <thead>
-                <tr class="row">
-                    <th class="col-4 col-md-3 d-flex justify-content-center">
-                        <span class="">サムネイル</span>
-                    </th>
-                    <th class="col-8 col-md-4 d-flex justify-content-center">
-                        <span class="">操作</span>
-                    </th>
-                </tr>
-            </thead>
-            <tbody>
-                <% for (let i in images) { %>
-                    <%- include('data_item', {image: images[i]}) %>
-                <% } %>
-            </tbody>
-        </table>
+        <% if (pageDifference.alertMessage !== undefined && pageDifference.alertMessage !== null) { %>
+            <div class="alert alert-success mt-4" role="alert">
+                <%= pageDifference.alertMessage %>
+            </div>
+        <% } %>
+        
+        <% if (images.length === 0) { %>
+            <p class="mt-4">まだ投稿された乳首はありません。</p>
+        <% } else { %>
+            <table class="table mt-5 container">
+                <thead>
+                    <tr class="row">
+                        <th class="col-4 col-md-3 d-flex justify-content-center">
+                            サムネイル
+                        </th>
+                        <th class="col-8 col-md-4 d-flex justify-content-center">
+                            操作
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% for (let i in images) { %>
+                        <%- include('data_item', {image: images[i]}) %>
+                    <% } %>
+                </tbody>
+            </table>
+        <% } %>
 
         <ul class="pagination justify-content-center">
             <% if (page > 0) { %>

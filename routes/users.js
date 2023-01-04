@@ -1,9 +1,10 @@
 const express = require("express");
 const router = express.Router();
+const fs = require("fs");
 const db = require("../models/index");
 const { sequelize } = require("../models/index");
 
-const NIPPLE_QUANTITY_PER_PAGE = 2;
+const NIPPLE_QUANTITY_PER_PAGE = 5;
 
 router.get("/", (req, res, next) => {
     res.redirect("/users/mypage/");
@@ -16,7 +17,7 @@ function imagesPageResponder(
     imagesQuery,
     pageDifference
 ) {
-    if (!module.exports.isLoggined(req, res)) {
+    if (!module.exports.isLoggined(req)) {
         res.redirect("/users/login");
         return;
     }
@@ -74,6 +75,25 @@ function imagesPageResponder(
         });
 }
 
+async function getImageByReq(req) {
+    const image = await db.Image.findOne({
+        where: {
+            id: req.body.imageID,
+        },
+    }).catch((err) => {
+        console.log(err);
+    });
+
+    if (image === null) {
+        return false;
+    }
+    if (image.userID != req.session.login.id) {
+        return false;
+    }
+
+    return image;
+}
+
 router.get("/mypage", (req, res, next) => {
     res.redirect("/users/mypage/0");
 });
@@ -88,7 +108,15 @@ router.get("/mypage/:page", (req, res, next) => {
         centerLink: "/users/nolocate/",
         centerLinkContext: "乳首座標未登録の画像一覧",
         locateButtonContext: "乳首座標再登録",
+        locateButtonLink: "/users/mypage",
     };
+    if (
+        req.session.alertMessage !== null ||
+        req.session.alertMessage !== undefined
+    ) {
+        pageDifference.alertMessage = req.session.alertMessage;
+    }
+    req.session.alertMessage = null;
     imagesPageResponder(req, res, countQuery, imagesQuery, pageDifference);
 });
 
@@ -105,13 +133,85 @@ router.get("/nolocate/:page", (req, res, next) => {
         pageName: "乳首座標未登録の画像一覧",
         centerLink: "/users/mypage/",
         centerLinkContext: "マイページ",
+        locateButtonLink: "/users/nolocate/",
         locateButtonContext: "乳首座標登録",
     };
     imagesPageResponder(req, res, countQuery, imagesQuery, pageDifference);
 });
 
+router.post("/mypage/", async (req, res, next) => {
+    if (!module.exports.isLoggined(req)) {
+        res.redirect("/users/login");
+        return;
+    }
+
+    const image = await getImageByReq(req);
+    if (!image) {
+        res.redirect("/users/mypage/");
+        return;
+    }
+
+    req.session.image = image;
+    res.redirect("/nipple/location/update");
+});
+
+router.post("/mypage/delete", async (req, res, next) => {
+    if (!module.exports.isLoggined(req)) {
+        res.redirect("/users/login");
+        return;
+    }
+
+    const image = await getImageByReq(req);
+    if (!image) {
+        res.redirect("/users/mypage/");
+        return;
+    }
+
+    const path = "./public" + image.path;
+    fs.unlink(path, (err) => {
+        console.log(err);
+    });
+
+    await db.Nipple.destroy({
+        where: {
+            imageID: image.id,
+        },
+    }).catch((err) => {
+        console.log(err);
+        return;
+    });
+
+    await db.Image.destroy({
+        where: {
+            id: image.id,
+        },
+    }).catch((err) => {
+        console.log(err);
+        return;
+    });
+
+    req.session.alertMessage = "乳首削除完了！";
+    res.redirect("/users/mypage/");
+});
+
+router.post("/nolocate/", async (req, res, next) => {
+    if (!module.exports.isLoggined(req)) {
+        res.redirect("/users/login");
+        return;
+    }
+
+    const image = await getImageByReq(req);
+    if (!image) {
+        res.redirect("/users/mypage/");
+        return;
+    }
+
+    req.session.image = image;
+    res.redirect("/nipple/location/");
+});
+
 router.get("/login", (req, res, next) => {
-    if (module.exports.isLoggined(req, res)) {
+    if (module.exports.isLoggined(req)) {
         res.redirect("/users/mypage");
         return;
     }
@@ -174,7 +274,7 @@ router.post("/create", (req, res, next) => {
 });
 
 router.get("/delete", (req, res, next) => {
-    if (!module.exports.isLoggined(req, res)) {
+    if (!module.exports.isLoggined(req)) {
         res.redirect("/users/login");
         return;
     }
@@ -197,7 +297,7 @@ router.get("/delete/complete", (req, res, next) => {
 
 module.exports = router;
 
-module.exports.isLoggined = (req, res) => {
+module.exports.isLoggined = (req) => {
     if (req.session.login == null) {
         return false;
     } else {
