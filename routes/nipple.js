@@ -62,8 +62,11 @@ router.post("/upload", upload.single("image"), function (req, res) {
         res.render("nipple/upload", data);
         return;
     }
+
+    const filePath = req.file.path.replace("public", "");
+
     db.Image.create({
-        path: req.file.path,
+        path: filePath,
         userID: req.session.login.id,
     });
     res.json({ result: "success!" });
