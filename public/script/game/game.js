@@ -1,4 +1,4 @@
-import { Title } from "/script/game/title.js";
+import { Title } from "./title.js";
 
 class Canvas {
     constructor(canvasWidth, canvasHeight) {
