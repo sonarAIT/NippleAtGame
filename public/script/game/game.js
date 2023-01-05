@@ -46,7 +46,6 @@ function EaseOutSine(t) {
 }
 
 const Tolerance = 30;
-
 const GoodWords = ["GREAT!", "HAPPY!", "WONDERUL!", "COOL!"];
 
 class NippleStarEffect {
@@ -73,11 +72,43 @@ class NippleStarEffect {
         const textWidth = ctx.measureText("★").width;
         const textHeight = 70;
 
-        // transrate
         ctx.translate(this.point.x, this.point.y);
         ctx.scale(scale, scale);
         ctx.rotate((angle * Math.PI) / 180);
         ctx.fillText("★", -textWidth / 2, textHeight / 2);
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+    }
+}
+
+class ZoomTextEffect {
+    constructor(canvas, text) {
+        this.text = text;
+        this.canvasWidth = canvas.width;
+        this.canvasHeight = canvas.height;
+        this.isEnd = false;
+        this.time = 0;
+        this.magnification = 0.75;
+    }
+
+    update(deltaTime) {
+        this.time += deltaTime;
+        if (this.time * this.magnification > 1) {
+            this.isEnd = true;
+        }
+    }
+
+    draw(ctx) {
+        const transparency = 1 - EaseOutSine(this.time * this.magnification);
+        const scale = 4 - EaseOutQuart(this.time * this.magnification) * 4;
+
+        ctx.fillStyle = `rgba(255, 0, 0, ${transparency})`;
+        ctx.font = "100px serif";
+        const textWidth = ctx.measureText(this.text).width;
+        const textHeight = 70;
+
+        ctx.translate(this.canvasWidth / 2, this.canvasHeight / 2);
+        ctx.scale(scale, scale);
+        ctx.fillText(this.text, -textWidth / 2, textHeight / 2);
         ctx.setTransform(1, 0, 0, 1, 0, 0);
     }
 }
@@ -177,11 +208,25 @@ class GameMain {
 
     async run() {
         this.prevTime = Date.now();
-        const interval = setInterval(() => {
+
+        this.effects.push(new ZoomTextEffect(this.canvas, "GO!"));
+        const gameInterval = setInterval(() => {
             this.update();
         }, 1000 / 60);
         await this.emitWaiter.wait();
-        clearInterval(interval);
+        clearInterval(gameInterval);
+
+        this.effects.push(new ZoomTextEffect(this.canvas, "CLEAR!"));
+        const afterClearInterval = setInterval(() => {
+            this.afterClearUpdate();
+        }, 1000 / 60);
+        await new Promise((resolve) => {
+            setTimeout(() => {
+                resolve();
+            }, 3000);
+        });
+        clearInterval(afterClearInterval);
+
         this.destroy();
     }
 
@@ -228,13 +273,6 @@ class GameMain {
         const now = Date.now();
         const deltaTime = (now - this.prevTime) / 1000;
 
-        this.nowTime += deltaTime;
-
-        if (this.mouseClickEvent) {
-            this.checkNippleClicked(this.mouseClickEvent);
-            this.mouseClickEvent = null;
-        }
-
         if (this.isLeftNippleClicked && this.isRightNippleClicked) {
             this.nowQuestion++;
             if (this.nowQuestion >= this.images.length) {
@@ -245,6 +283,13 @@ class GameMain {
             this.isLeftNippleClicked = false;
             this.isRightNippleClicked = false;
             this.effects.push(new OKEffect());
+        }
+
+        this.nowTime += deltaTime;
+
+        if (this.mouseClickEvent) {
+            this.checkNippleClicked(this.mouseClickEvent);
+            this.mouseClickEvent = null;
         }
 
         this.effects.forEach((effect) => {
@@ -270,6 +315,39 @@ class GameMain {
                 isClicked: this.isRightNippleClicked,
                 X: this.nipples[this.nowQuestion].rightNippleX,
                 Y: this.nipples[this.nowQuestion].rightNippleY,
+            },
+        };
+        this.drawer.draw(data);
+    }
+
+    afterClearUpdate() {
+        const now = Date.now();
+        const deltaTime = (now - this.prevTime) / 1000;
+
+        this.effects.forEach((effect) => {
+            effect.update(deltaTime);
+        });
+
+        this.effects = this.effects.filter((effect) => {
+            return !effect.isEnd;
+        });
+
+        this.prevTime = now;
+
+        const lastQuestion = this.images.length - 1;
+        const data = {
+            image: this.images[lastQuestion],
+            time: this.nowTime,
+            effects: this.effects,
+            leftNipple: {
+                isClicked: this.isLeftNippleClicked,
+                X: this.nipples[lastQuestion].leftNippleX,
+                Y: this.nipples[lastQuestion].leftNippleY,
+            },
+            rightNipple: {
+                isClicked: this.isRightNippleClicked,
+                X: this.nipples[lastQuestion].rightNippleX,
+                Y: this.nipples[lastQuestion].rightNippleY,
             },
         };
         this.drawer.draw(data);

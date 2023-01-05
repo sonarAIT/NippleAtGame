@@ -34,12 +34,14 @@ class CountDownDrawer {
         context.fillStyle = `rgba(255, 0, 0, ${transparency})`;
         context.font = "100px selif";
         const textWidth = context.measureText(nowSecond).width;
+        const textHeight = 80;
 
-        context.setTransform(scale, 0, 0, scale, 0, 0);
+        context.transform(this.canvas.width / 2, this.canvas.height / 2);
+        context.scale(scale, scale);
         context.fillText(
             nowSecond,
-            (this.canvas.width / scale - textWidth) / 2,
-            this.canvas.height / scale / 2
+            - textWidth / 2,
+            textHeight / 2
         );
         context.setTransform(1, 0, 0, 1, 0, 0);
     }
