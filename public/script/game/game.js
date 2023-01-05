@@ -47,6 +47,8 @@ function EaseOutSine(t) {
 
 const Tolerance = 30;
 
+const GoodWords = ["GREAT!", "HAPPY!", "WONDERUL!", "COOL!"];
+
 class NippleStarEffect {
     constructor(point) {
         this.point = point;
@@ -82,12 +84,30 @@ class NippleStarEffect {
 
 class OKEffect {
     constructor() {
-        this.isEnd = true;
+        this.isEnd = false;
+        this.time = 0;
+        this.text = GoodWords[Math.floor(Math.random() * GoodWords.length)];
+        this.point = { x:600, y: 400 };
     }
 
-    update(deltaTime) {}
+    update(deltaTime) {
+        this.time += deltaTime;
+        if (this.time > 1) {
+            this.isEnd = true;
+        }
+    }
 
-    draw(ctx) {}
+    draw(ctx) {
+        const transparency = 1 - EaseOutSine(this.time);
+        const y = this.point.y + EaseOutQuart(this.time) * 50;
+
+        ctx.fillStyle = `rgba(255, 0, 0, ${transparency})`;
+        ctx.font = "50px serif";
+        const textWidth = ctx.measureText(this.text).width;
+        const textHeight = 70;
+
+        ctx.fillText(this.text, this.point.x - textWidth / 2, y + textHeight / 2);
+    }
 }
 
 class GameMainDrawer {
