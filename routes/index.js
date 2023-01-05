@@ -11,7 +11,7 @@ router.get("/", function (req, res, next) {
 router.get("/gamedata", function (req, res, next) {
     sequelize
         .query(
-            "SELECT path FROM IMAGES WHERE EXISTS (SELECT * FROM NIPPLES WHERE NIPPLES.imageID = IMAGES.id) ORDER BY RANDOM() LIMIT 10"
+            "SELECT path, leftNippleX, leftNippleY, rightNippleX, rightNippleY FROM IMAGES INNER JOIN NIPPLES ON NIPPLES.imageID = IMAGES.id ORDER BY RANDOM() LIMIT 10"
         )
         .then((queryRes) => {
             const images = queryRes[0];

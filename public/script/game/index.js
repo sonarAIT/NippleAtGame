@@ -34,9 +34,9 @@ class Main {
         await title.run();
 
         const fetch = new Fetch(canvas);
-        const images = await fetch.run();
+        const nipples = await fetch.run();
 
-        const game = new Game(canvas, images);
+        const game = new Game(canvas, nipples);
         await game.run();
     }
 }

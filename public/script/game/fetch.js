@@ -2,8 +2,8 @@ class ImageDatasFetcher {
     constructor() {}
 
     async fetch() {
-        const images = await axios.get("/gamedata");
-        return images.data;
+        const nipples = await axios.get("/gamedata");
+        return nipples.data;
     }
 }
 
@@ -32,7 +32,7 @@ export class Fetch {
         fetchingScreenDrawer.draw();
 
         const imageDatasFetcher = new ImageDatasFetcher();
-        const images = await imageDatasFetcher.fetch();
-        return images;
+        const nipples = await imageDatasFetcher.fetch();
+        return nipples;
     }
 }
