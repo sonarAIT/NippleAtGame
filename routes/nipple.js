@@ -36,16 +36,16 @@ const upload = multer({
     },
 });
 
-function redirectOnLocationPageRequestMiss(req, res) {
+function getRedirectFunctionOnLocationPageRequestMiss(req, res) {
     if (!users.isLoggined(req)) {
-        res.redirect("/users/login");
-        return;
+        return () => res.redirect("/users/login");
     }
 
     if (req.session.image === undefined) {
-        res.redirect("/nipple/upload");
-        return;
+        return () => res.redirect("/nipple/upload");
     }
+
+    return false;
 }
 
 function LocationPageResponder(req, res, pageDifference) {
@@ -58,15 +58,13 @@ function LocationPageResponder(req, res, pageDifference) {
     res.render("nipple/location", data);
 }
 
-function redirectOnNippleDataMiss(req, res, pageDifference) {
+function getRedirectFunctionOnNippleDataMiss(req, res, pageDifference) {
     if (!users.isLoggined(req)) {
-        res.redirect("/users/login");
-        return;
+        return () => res.redirect("/users/login");
     }
 
     if (req.session.image === undefined) {
-        res.redirect("/nipple/upload");
-        return;
+        return () => res.redirect("/nipple/upload");
     }
 
     if (
@@ -76,7 +74,6 @@ function redirectOnNippleDataMiss(req, res, pageDifference) {
         req.body.rightNippleY === ""
     ) {
         // このエラーが発生している時点で新規投稿であることは確約されている。
-        // これで対処できなくなった場合は、redirectを実行するラムダ式を返すようにredirectOnNippleDataMissを変更し、pageDifferenceを引数に渡す。
         const pageDifference = {
             nipple: {
                 leftX: null,
@@ -92,9 +89,10 @@ function redirectOnNippleDataMiss(req, res, pageDifference) {
             photoPath: req.session.image.path,
             pageDifference: pageDifference,
         };
-        res.render("nipple/location", data);
-        return;
+        return () => res.render("nipple/location", data);
     }
+
+    return false;
 }
 
 router.get("/upload", (req, res, next) => {
@@ -140,7 +138,11 @@ router.post("/upload", upload.single("image"), function (req, res) {
 });
 
 router.get("/location", (req, res, next) => {
-    redirectOnLocationPageRequestMiss(req, res);
+    const redirectFunc = getRedirectFunctionOnLocationPageRequestMiss(req, res);
+    if (redirectFunc) {
+        redirectFunc();
+        return;
+    }
 
     const pageDifference = {
         nipple: {
@@ -156,7 +158,11 @@ router.get("/location", (req, res, next) => {
 });
 
 router.get("/location/update", (req, res, next) => {
-    redirectOnLocationPageRequestMiss(req, res);
+    const redirectFunc = getRedirectFunctionOnLocationPageRequestMiss(req, res);
+    if (redirectFunc) {
+        redirectFunc();
+        return;
+    }
 
     db.Nipple.findOne({
         where: {
@@ -177,7 +183,11 @@ router.get("/location/update", (req, res, next) => {
 });
 
 router.post("/location", (req, res, next) => {
-    redirectOnNippleDataMiss(req, res);
+    const redirectFunc = getRedirectFunctionOnNippleDataMiss(req, res);
+    if (redirectFunc) {
+        redirectFunc();
+        return;
+    }
 
     db.Nipple.create({
         leftNippleX: req.body.leftNippleX,
@@ -197,7 +207,11 @@ router.post("/location", (req, res, next) => {
 });
 
 router.post("/location/update", (req, res, next) => {
-    redirectOnNippleDataMiss(req, res);
+    const redirectFunc = getRedirectFunctionOnNippleDataMiss(req, res);
+    if (redirectFunc) {
+        redirectFunc();
+        return;
+    }
 
     db.Nipple.update(
         {
