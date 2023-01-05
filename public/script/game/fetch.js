@@ -3,7 +3,7 @@ class ImageDatasFetcher {
 
     async fetch() {
         const images = await axios.get("/gamedata");
-        return images;
+        return images.data;
     }
 }
 

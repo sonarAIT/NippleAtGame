@@ -5,9 +5,34 @@ class GameScreenDrawer {
         this.canvas = canvas;
     }
 
+    drawImage(ctx, image) {
+        const height = this.canvas.height;
+        const width = image.width * (height / image.height);
+        const x = (this.canvas.width - width) / 2;
+        ctx.drawImage(image, x, 0, width, height);
+    }
+
+    drawTime(ctx, time) {
+        ctx.fillStyle = "black";
+        ctx.font = "48px serif";
+
+        const ms = Math.floor(time * 100) % 100;
+        const ss = Math.floor(time) % 60;
+        const mm = Math.floor(time / 60);
+
+        const msText = ms < 10 ? `0${ms}` : `${ms}`;
+        const ssText = ss < 10 ? `0${ss}` : `${ss}`;
+        const mmText = mm < 10 ? `0${mm}` : `${mm}`;
+        const timeText = `${mmText}:${ssText}:${msText}`;
+
+        ctx.fillText(timeText, 10, 50);
+    }
+
     draw(data) {
         // draw image
+        this.drawImage(data.context, data.image);
         // draw time
+        this.drawTime(data.context, data.time);
         // draw effect
     }
 }
@@ -20,9 +45,9 @@ const TimePerSecOnCountdown = 2;
 const CountDownSecond = 3;
 
 class CountDown {
-    constructor(canvas, images) {
+    constructor(canvas, image) {
         this.canvas = canvas;
-        this.images = images;
+        this.image = image;
         this.gameScreenDrawer = new GameScreenDrawer(this.canvas);
         this.emitWaiter = new EmitWaiter();
         this.remainingTime = TimePerSecOnCountdown * CountDownSecond - 0.01;
@@ -61,7 +86,7 @@ class CountDown {
         const prevT = this.getCountDownNumberT(prevRemainingTime);
         const t = this.getCountDownNumberT(this.remainingTime);
 
-        if (prevT != 1 && t == 1) {
+        if (prevT < 1 && t == 1) {
             // sound
         }
 
@@ -76,7 +101,7 @@ class CountDown {
         const transparency = t;
         const scale = 3 - t * 1.5;
 
-        context.fillStyle = `rgba(0, 0, 0, ${transparency})`;
+        context.fillStyle = `rgba(255, 0, 0, ${transparency})`;
         context.font = "100px selif";
         const textWidth = context.measureText(nowSecond).width;
 
@@ -93,7 +118,13 @@ class CountDown {
         const context = this.canvas.getCtx();
         context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        this.gameScreenDrawer.draw(context);
+        const data = {
+            context: context,
+            image: this.image,
+            time: 0,
+            effect: [],
+        }
+        this.gameScreenDrawer.draw(data);
         this.drawCountDownNumber(context);
     }
 }
@@ -101,13 +132,18 @@ class CountDown {
 export class Game {
     constructor(canvas, images) {
         this.canvas = canvas;
-        this.images = images;
+        this.images = [];
+        images.forEach(element => {
+            const image = new Image();
+            image.src = element.path;
+            this.images.push(image);
+        });
         this.emitWaiter = new EmitWaiter();
     }
 
     async run() {
         // countdown
-        const countDown = new CountDown(this.canvas, this.images);
+        const countDown = new CountDown(this.canvas, this.images[0]);
         await countDown.run();
         // run game
         // show score
