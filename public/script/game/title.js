@@ -85,7 +85,6 @@ class TitleScreenDrawer {
             comp.startButton.font.location.x,
             comp.startButton.font.location.y
         );
-        console.log(context.measureText(comp.startButton.font.text))
     }
 }
 
