@@ -2,7 +2,8 @@ class ImageDatasFetcher {
     constructor() {}
 
     async fetch() {
-        console.log(axios);
+        const images = await axios.get("/gamedata");
+        return images;
     }
 }
 
@@ -14,7 +15,7 @@ class FetchingScreenDrawer {
     draw() {
         const context = this.canvas.getCtx();
         context.clearRect(0, 0, this.canvas.width, this.canvas.height);
-        
+
         context.fillStyle = "black";
         context.font = "20px serif";
         context.fillText("Loading...", 10, 50);
