@@ -1,11 +1,30 @@
 <!DOCTYPE html>
-<html>
-  <head>
-    <title><%= title %></title>
-    <link rel='stylesheet' href='/stylesheets/style.css' />
-  </head>
-  <body>
-    <h1><%= title %></h1>
-    <p>Welcome to <%= title %></p>
-  </body>
+<html lang="ja">
+
+<head>
+  <meta http-equiv="content-type" content="text/html" ; charset="UTF-8">
+  <title>
+    乳首あてゲーム
+  </title>
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+    crossorigin="anonymous">
+  <link rel='stylesheet' href='/stylesheets/style.css' />
+  <script src="/script/game.js"></script>
+</head>
+
+<body class="container">
+  <header>
+    <h3 class="display-5">
+      乳首あてゲーム
+    </h3>
+  </header>
+  <div role="main">
+    <canvas id="canvas" width="300" height="300"></canvas>
+    <p class="mt-4">誰よりも早く乳首を突け！</p>
+    <p class="mt-1">
+      <a href="/users/mypage">マイページへ</a>
+    </p>
+  </div>
+</body>
+
 </html>
