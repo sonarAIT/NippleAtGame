@@ -1,3 +1,5 @@
+import { Title } from "/script/game/title.js";
+
 class Canvas {
     constructor(canvasWidth, canvasHeight) {
         this.canvas = document.getElementById("canvas");
@@ -25,11 +27,8 @@ class Main {
 
     main() {
         const canvas = new Canvas(this.canvasWidth, this.canvasHeight);
-        const func = (ctx) => {
-            ctx.fillStyle = "red";
-            ctx.fillRect(0, 0, 100, 100);
-        }
-        func(canvas.getCtx());
+        const title = new Title(canvas);
+        title.run();
     }
 }
 
