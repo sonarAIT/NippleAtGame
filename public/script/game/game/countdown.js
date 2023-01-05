@@ -21,7 +21,7 @@ class CountDownDrawer {
     constructor(canvas, image) {
         this.canvas = canvas;
         this.image = image;
-        this.gameScreenDrawer = new GameScreenDrawer(this.canvas);
+        this.gameScreenDrawer = new GameScreenDrawer(canvas);
     }
 
     drawCountDownNumber(context, remainingTime) {
@@ -52,7 +52,6 @@ class CountDownDrawer {
             context: context,
             image: this.image,
             time: 0,
-            effect: [],
         };
         this.gameScreenDrawer.draw(data);
         this.drawCountDownNumber(context, propsData.remainingTime);
@@ -70,10 +69,6 @@ export class CountDown {
         this.prevTime = Date.now();
         const interval = setInterval(() => {
             this.update();
-            const data = {
-                remainingTime: this.remainingTime,
-            };
-            this.drawer.draw(data);
         }, 1000 / 60);
         await this.emitWaiter.wait();
         clearInterval(interval);
@@ -88,6 +83,7 @@ export class CountDown {
 
         if (this.remainingTime <= 0) {
             this.emitWaiter.emit();
+            return;
         }
 
         const prevT = getCountDownNumberT(prevRemainingTime);
@@ -98,5 +94,10 @@ export class CountDown {
         }
 
         this.prevTime = nowTime;
+
+        const data = {
+            remainingTime: this.remainingTime,
+        };
+        this.drawer.draw(data);
     }
 }
