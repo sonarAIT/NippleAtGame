@@ -38,6 +38,15 @@ class CountDown {
         clearInterval(interval);
     }
 
+    getCountDownNumberT(remainingTime) {
+        return Math.min(
+            EaseOutCubic(
+                (remainingTime % TimePerSecOnCountdown) / TimePerSecOnCountdown
+            ) * 2,
+            1
+        );
+    }
+
     update() {
         const nowTime = Date.now();
         const deltaTime = (nowTime - this.prevTime) / 1000;
@@ -49,8 +58,8 @@ class CountDown {
             this.emitWaiter.emit();
         }
 
-        const prevT = getCountDownNumberT(prevRemainingTime);
-        const t = getCountDownNumberT(this.remainingTime);
+        const prevT = this.getCountDownNumberT(prevRemainingTime);
+        const t = this.getCountDownNumberT(this.remainingTime);
 
         if (prevT != 1 && t == 1) {
             // sound
@@ -59,17 +68,7 @@ class CountDown {
         this.prevTime = nowTime;
     }
 
-    getCountDownNumberT(remainingTime) {
-        return Math.min(
-            EaseOutCubic(
-                (remainingTime % TimePerSecOnCountdown) /
-                    TimePerSecOnCountdown
-            ) * 2,
-            1
-        );
-    }
-
-    drawCountDownNumber() {
+    drawCountDownNumber(context) {
         const nowSecond =
             Math.floor(this.remainingTime / TimePerSecOnCountdown) + 1;
         const t = this.getCountDownNumberT(this.remainingTime);
@@ -94,8 +93,8 @@ class CountDown {
         const context = this.canvas.getCtx();
         context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-        this.gameScreenDrawer.draw();
-        this.drawCountDownNumber();
+        this.gameScreenDrawer.draw(context);
+        this.drawCountDownNumber(context);
     }
 }
 
