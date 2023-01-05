@@ -282,7 +282,48 @@ router.get("/delete", (req, res, next) => {
     res.render("users/delete");
 });
 
-router.post("/delete", (req, res, next) => {
+router.post("/delete", async (req, res, next) => {
+    if (!module.exports.isLoggined(req)) {
+        res.redirect("/users/login");
+        return;
+    }
+
+    const images = await db.Image.findAll({
+        where: {
+            userID: req.session.login.id,
+        },
+    }).catch((err) => {
+        console.log(err);
+    });
+
+    images.forEach((image) => {
+        const path = "./public" + image.path;
+        fs.unlink(path, (err) => {
+            console.log(err);
+        });
+    });
+
+    sequelize
+        .query(
+            "DELETE FROM NIPPLES WHERE EXISTS (SELECT * FROM IMAGES WHERE IMAGES.id = NIPPLES.imageID AND IMAGES.userID = :userID)",
+            {
+                replacements: {
+                    userID: req.session.login.id,
+                },
+            }
+        )
+        .catch((err) => {
+            console.log(err);
+        });
+
+    db.Image.destroy({
+        where: {
+            userID: req.session.login.id,
+        },
+    }).catch((err) => {
+        console.log(err);
+    });
+
     db.User.findByPk(req.session.login.id).then((user) => {
         user.destroy().then(() => {
             req.session.login = null;
