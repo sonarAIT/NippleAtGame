@@ -1,4 +1,5 @@
 import { Title } from "./title.js";
+import { Fetch } from "./fetch.js";
 
 class Canvas {
     constructor(canvasWidth, canvasHeight) {
@@ -25,10 +26,14 @@ class Main {
         this.canvasHeight = 500;
     }
 
-    main() {
+    async main() {
         const canvas = new Canvas(this.canvasWidth, this.canvasHeight);
+
         const title = new Title(canvas);
-        title.run();
+        await title.run();
+
+        const fetch = new Fetch(canvas);
+        const images = await fetch.run();
     }
 }
 
