@@ -48,10 +48,8 @@ class TitleScreenDrawer {
 
     draw(data) {
         const context = this.canvas.getCtx();
-        const canvasWidth = this.canvas.width;
-        const canvasHeight = this.canvas.height;
-        context.clearRect(0, 0, canvasWidth, canvasHeight);
-        context.strokeRect(0, 0, canvasWidth, canvasHeight);
+        context.clearRect(0, 0, this.canvas.width, this.canvas.height);
+        context.strokeRect(0, 0, this.canvas.width, this.canvas.height);
 
         // draw title
         context.fillStyle = "black";
