@@ -49,30 +49,30 @@ class CountDown {
             this.emitWaiter.emit();
         }
 
-        const floorPrevRemainingTime = Math.floor(
-            prevRemainingTime / TimePerSecOnCountdown
-        );
-        const floorRemainingTime = Math.floor(
-            this.remainingTime / TimePerSecOnCountdown
-        );
+        const prevT = getCountDownNumberT(prevRemainingTime);
+        const t = getCountDownNumberT(this.remainingTime);
 
-        if (floorPrevRemainingTime !== floorRemainingTime) {
+        if (prevT != 1 && t == 1) {
             // sound
         }
 
         this.prevTime = nowTime;
     }
 
-    drawCountDownNumber() {
-        const nowSecond =
-            Math.floor(this.remainingTime / TimePerSecOnCountdown) + 1;
-        const t = Math.min(
+    getCountDownNumberT(remainingTime) {
+        return Math.min(
             EaseOutCubic(
-                (this.remainingTime % TimePerSecOnCountdown) /
+                (remainingTime % TimePerSecOnCountdown) /
                     TimePerSecOnCountdown
             ) * 2,
             1
         );
+    }
+
+    drawCountDownNumber() {
+        const nowSecond =
+            Math.floor(this.remainingTime / TimePerSecOnCountdown) + 1;
+        const t = this.getCountDownNumberT(this.remainingTime);
 
         const transparency = t;
         const scale = 3 - t * 1.5;
