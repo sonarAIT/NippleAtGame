@@ -37,27 +37,52 @@ export class GameScreenDrawer {
     }
 }
 
+function EaseOutQuart(t) {
+    return Math.pow(1 - t, 4);
+}
+
+function EaseOutSine(t) {
+    return Math.sin((t * Math.PI) / 2);
+}
+
 const Tolerance = 30;
 
 class NippleStarEffect {
     constructor(point) {
-
+        this.point = point;
+        this.isEnd = false;
+        this.time = 0;
     }
 
-    isEnd() {
-        return true;
+    update(deltaTime) {
+        this.time += deltaTime;
+        if (this.time > 1) {
+            this.isEnd = true;
+        }
     }
 
-    update(deltaTime) {}
+    draw(ctx) {
+        const transparency = 1 - EaseOutSine(this.time);
+        const scale = 4 - EaseOutQuart(this.time) * 4;
+        const angle = EaseOutQuart(this.time) * 180;
 
-    draw(ctx) {}
+        ctx.fillStyle = `rgba(255, 255, 0, ${transparency})`;
+        ctx.font = "100px serif";
+        const textWidth = ctx.measureText("★").width;
+        const textHeight = 70;
+
+        // transrate
+        ctx.translate(this.point.x, this.point.y);
+        ctx.scale(scale, scale);
+        ctx.rotate((angle * Math.PI) / 180);
+        ctx.fillText("★", -textWidth / 2, textHeight / 2);
+        ctx.setTransform(1, 0, 0, 1, 0, 0);
+    }
 }
 
 class OKEffect {
-    constructor() {}
-
-    isEnd() {
-        return true;
+    constructor() {
+        this.isEnd = true;
     }
 
     update(deltaTime) {}
@@ -72,7 +97,7 @@ class GameMainDrawer {
     }
 
     drawNipple(ctx, nipple) {
-        if(!nipple.isClicked) {
+        if (!nipple.isClicked) {
             return;
         }
 
@@ -106,6 +131,7 @@ class GameMainDrawer {
 
 class GameMain {
     constructor(canvas, nipples, images) {
+        this.canvas = canvas;
         this.nipples = nipples;
         this.images = images;
 
@@ -121,9 +147,12 @@ class GameMain {
         this.isLeftNippleClicked = false;
         this.isRightNippleClicked = false;
 
-        canvas.getCanvas().addEventListener("click", (e) => {
+        this.mouseClickEventListener = (e) => {
             this.mouseClickEvent = e;
-        });
+        };
+        canvas
+            .getCanvas()
+            .addEventListener("click", this.mouseClickEventListener);
     }
 
     async run() {
@@ -133,6 +162,7 @@ class GameMain {
         }, 1000 / 60);
         await this.emitWaiter.wait();
         clearInterval(interval);
+        this.destroy();
     }
 
     checkNippleClicked(e) {
@@ -148,10 +178,12 @@ class GameMain {
             !this.isLeftNippleClicked
         ) {
             this.isLeftNippleClicked = true;
-            this.effects.push(new NippleStarEffect({
-                x: nipple.leftNippleX,
-                y: nipple.leftNippleY,
-            }));
+            this.effects.push(
+                new NippleStarEffect({
+                    x: nipple.leftNippleX,
+                    y: nipple.leftNippleY,
+                })
+            );
             return;
         }
 
@@ -163,10 +195,12 @@ class GameMain {
             !this.isRightNippleClicked
         ) {
             this.isRightNippleClicked = true;
-            this.effects.push(new NippleStarEffect({
-                x: nipple.rightNippleX,
-                y: nipple.rightNippleY,
-            }));
+            this.effects.push(
+                new NippleStarEffect({
+                    x: nipple.rightNippleX,
+                    y: nipple.rightNippleY,
+                })
+            );
         }
     }
 
@@ -198,7 +232,7 @@ class GameMain {
         });
 
         this.effects = this.effects.filter((effect) => {
-            return !effect.isEnd();
+            return !effect.isEnd;
         });
 
         this.prevTime = now;
@@ -220,6 +254,12 @@ class GameMain {
         };
         this.drawer.draw(data);
     }
+
+    destroy() {
+        this.canvas
+            .getCanvas()
+            .removeEventListener("click", this.mouseClickEventListener);
+    }
 }
 
 export class Game {
@@ -238,7 +278,7 @@ export class Game {
     async run() {
         // countdown
         const countDown = new CountDown(this.canvas, this.images[0]);
-        await countDown.run();
+        // await countDown.run();
         // run game
         const gameMain = new GameMain(this.canvas, this.nipples, this.images);
         await gameMain.run();

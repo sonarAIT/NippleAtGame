@@ -71,6 +71,7 @@ export class CountDown {
             this.update();
         }, 1000 / 60);
         await this.emitWaiter.wait();
+        await new Promise((resolve) => setTimeout(resolve, 1000));
         clearInterval(interval);
     }
 
@@ -89,7 +90,7 @@ export class CountDown {
         const prevT = getCountDownNumberT(prevRemainingTime);
         const t = getCountDownNumberT(this.remainingTime);
 
-        if (prevT < 1 && t == 1) {
+        if (prevT < 0.9 && t >= 0.9) {
             // sound
         }
 
