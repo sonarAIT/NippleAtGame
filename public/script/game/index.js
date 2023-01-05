@@ -1,5 +1,6 @@
 import { Title } from "./title.js";
 import { Fetch } from "./fetch.js";
+import { Game } from "./game.js";
 
 class Canvas {
     constructor(canvasWidth, canvasHeight) {
@@ -34,6 +35,9 @@ class Main {
 
         const fetch = new Fetch(canvas);
         const images = await fetch.run();
+
+        const game = new Game(canvas, images);
+        await game.run();
     }
 }
 
