@@ -33,11 +33,13 @@ class Main {
         const title = new Title(canvas);
         await title.run();
 
-        const fetch = new Fetch(canvas);
-        const nipples = await fetch.run();
+        while (1) {
+            const fetch = new Fetch(canvas);
+            const nipples = await fetch.run();
 
-        const game = new Game(canvas, nipples);
-        await game.run();
+            const game = new Game(canvas, nipples);
+            await game.run();
+        }
     }
 }
 

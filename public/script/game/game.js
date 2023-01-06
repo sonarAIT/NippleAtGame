@@ -51,10 +51,10 @@ export class Game {
     async run() {
         // countdown
         const countDown = new CountDown(this.canvas, this.images[0]);
-        // await countDown.run();
+        await countDown.run();
         // run game
         const gameMain = new GameMain(this.canvas, this.nipples, this.images);
-        // await gameMain.run();
+        await gameMain.run();
         // show score
         const score = new Score(this.canvas, this.images[this.images.length - 1], gameMain.getNowTime());
         await score.run();

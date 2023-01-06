@@ -36,7 +36,7 @@ class CountDownDrawer {
         const textWidth = context.measureText(nowSecond).width;
         const textHeight = 80;
 
-        context.transform(this.canvas.width / 2, this.canvas.height / 2);
+        context.translate(this.canvas.width / 2, this.canvas.height / 2);
         context.scale(scale, scale);
         context.fillText(
             nowSecond,
