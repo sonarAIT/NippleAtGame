@@ -2,6 +2,48 @@ import { CountDown } from "./game/countdown.js";
 import { GameMain } from "./game/gamemain.js";
 import { Score } from "./game/score.js";
 
+const AudioNames = ["click1", "click2", "countdown1", "countdown2", "finish"];
+const MusicNames = ["BGM1", "BGM2"];
+
+class AudioPlayer {
+    constructor() {
+        this.audios = [];
+        AudioNames.forEach((name) => {
+            this.audios[name] = new Audio("/sound/" + name + ".mp3");
+        });
+
+        this.musics = [];
+        MusicNames.forEach((name) => {
+            this.musics[name] = new Audio("/sound/" + name + ".mp3");
+            this.musics[name].addEventListener(
+                "ended",
+                function () {
+                    music.currentTime = 0;
+                    music.play();
+                },
+                false
+            );
+        });
+    }
+
+    playAudio(name) {
+        this.audios[name].pause();
+        this.audios[name].currentTime = 0;
+        this.audios[name].play();
+    }
+
+    playMusic(name) {
+        this.musics[name].play();
+    }
+
+    stopMusic(name) {
+        this.musics[name].pause();
+        this.musics[name].currentTime = 0;
+    }
+}
+
+export const AudioPlayerInstance = new AudioPlayer();
+
 export class GameScreenDrawer {
     constructor(canvas) {
         this.canvas = canvas;
@@ -56,7 +98,11 @@ export class Game {
         const gameMain = new GameMain(this.canvas, this.nipples, this.images);
         await gameMain.run();
         // show score
-        const score = new Score(this.canvas, this.images[this.images.length - 1], gameMain.getNowTime());
+        const score = new Score(
+            this.canvas,
+            this.images[this.images.length - 1],
+            gameMain.getNowTime()
+        );
         await score.run();
     }
 }

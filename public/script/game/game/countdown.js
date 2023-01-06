@@ -1,4 +1,4 @@
-import { GameScreenDrawer } from "../game.js";
+import { AudioPlayerInstance, GameScreenDrawer } from "../game.js";
 import { EmitWaiter } from "../util.js";
 
 function EaseOutCubic(t) {
@@ -74,6 +74,7 @@ export class CountDown {
         }, 1000 / 60);
         await this.emitWaiter.wait();
         await new Promise((resolve) => setTimeout(resolve, 1000));
+        AudioPlayerInstance.playAudio("countdown2");
         clearInterval(interval);
     }
 
@@ -93,7 +94,7 @@ export class CountDown {
         const t = getCountDownNumberT(this.remainingTime);
 
         if (prevT < 0.9 && t >= 0.9) {
-            // sound
+            AudioPlayerInstance.playAudio("countdown1");
         }
 
         this.prevTime = nowTime;

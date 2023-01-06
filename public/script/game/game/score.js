@@ -1,4 +1,4 @@
-import { GameScreenDrawer } from "../game.js";
+import { AudioPlayerInstance, GameScreenDrawer } from "../game.js";
 import { EmitWaiter } from "../util.js";
 
 const comp = {
@@ -147,12 +147,14 @@ export class Score {
     }
 
     async run() {
+        AudioPlayerInstance.playMusic("BGM2");
         const interval = setInterval(() => {
             this.update();
         }, 1000 / 60);
         await this.emitWaiter.wait();
         clearInterval(interval);
         this.destroy();
+        AudioPlayerInstance.stopMusic("BGM2");
     }
 
     isOnRestartButton(e) {

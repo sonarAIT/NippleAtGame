@@ -1,4 +1,4 @@
-import { GameScreenDrawer } from "../game.js";
+import { AudioPlayerInstance, GameScreenDrawer } from "../game.js";
 import { EmitWaiter } from "../util.js";
 
 function EaseOutQuart(t) {
@@ -176,6 +176,7 @@ export class GameMain {
 
     async run() {
         this.prevTime = Date.now();
+        AudioPlayerInstance.playMusic("BGM1");
 
         this.effects.push(new ZoomTextEffect(this.canvas, "GO!"));
         const gameInterval = setInterval(() => {
@@ -184,6 +185,8 @@ export class GameMain {
         await this.emitWaiter.wait();
         clearInterval(gameInterval);
 
+        AudioPlayerInstance.stopMusic("BGM1");
+        AudioPlayerInstance.playAudio("finish");
         this.effects.push(new ZoomTextEffect(this.canvas, "CLEAR!"));
         const afterClearInterval = setInterval(() => {
             this.afterClearUpdate();
@@ -221,6 +224,8 @@ export class GameMain {
                     y: nipple.leftNippleY,
                 })
             );
+            AudioPlayerInstance.playAudio("click1");
+            AudioPlayerInstance.playAudio("click2");
             return;
         }
 
@@ -238,6 +243,8 @@ export class GameMain {
                     y: nipple.rightNippleY,
                 })
             );
+            AudioPlayerInstance.playAudio("click1");
+            AudioPlayerInstance.playAudio("click2");
         }
     }
 
