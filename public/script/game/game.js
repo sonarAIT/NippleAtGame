@@ -17,9 +17,9 @@ class AudioPlayer {
             this.musics[name] = new Audio("/sound/" + name + ".mp3");
             this.musics[name].addEventListener(
                 "ended",
-                function () {
-                    music.currentTime = 0;
-                    music.play();
+                () => {
+                    this.musics[name].currentTime = 0;
+                    this.musics[name].play();
                 },
                 false
             );
