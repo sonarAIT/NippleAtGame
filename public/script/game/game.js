@@ -1,6 +1,6 @@
-import { EmitWaiter } from "./util.js";
 import { CountDown } from "./game/countdown.js";
 import { GameMain } from "./game/gamemain.js";
+import { Score } from "./game/score.js";
 
 export class GameScreenDrawer {
     constructor(canvas) {
@@ -46,7 +46,6 @@ export class Game {
             image.src = element.path;
             this.images.push(image);
         });
-        this.emitWaiter = new EmitWaiter();
     }
 
     async run() {
@@ -55,7 +54,9 @@ export class Game {
         // await countDown.run();
         // run game
         const gameMain = new GameMain(this.canvas, this.nipples, this.images);
-        await gameMain.run();
+        // await gameMain.run();
         // show score
+        const score = new Score(this.canvas, this.images[this.images.length - 1], gameMain.getNowTime());
+        await score.run();
     }
 }

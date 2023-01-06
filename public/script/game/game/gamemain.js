@@ -198,6 +198,10 @@ export class GameMain {
         this.destroy();
     }
 
+    getNowTime() {
+        return this.nowTime;
+    }
+
     checkNippleClicked(e) {
         const mouseX = e.offsetX;
         const mouseY = e.offsetY;
