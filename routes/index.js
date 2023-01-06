@@ -15,6 +15,10 @@ router.get("/gamedata", function (req, res, next) {
         )
         .then((queryRes) => {
             const images = queryRes[0];
+            if (images.length == 0) {
+                res.json([]);
+                return;
+            }
             if (images.length < QUESTION_QUANTITY) {
                 const missingQuantity = QUESTION_QUANTITY - images.length;
                 [...Array(missingQuantity)].forEach(() => {

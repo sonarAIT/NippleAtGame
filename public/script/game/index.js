@@ -36,6 +36,10 @@ class Main {
         while (1) {
             const fetch = new Fetch(canvas);
             const nipples = await fetch.run();
+            if (nipples.length == 0) {
+                window.alert("まだ誰も乳首を投稿していません。乳首を投稿してください。");
+                break;
+            }
 
             const game = new Game(canvas, nipples);
             await game.run();
