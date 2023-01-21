@@ -6,39 +6,33 @@ class Point {
 }
 
 class Nipple {
-    constructor(form) {
-        this.leftNipple = new Point(
-            form.getLeftNippleX(),
-            form.getLeftNippleY()
-        );
-        if (this.leftNipple.x == 0 && this.leftNipple.y == 0) {
-            this.leftNipple = null;
-        }
-        
-        this.rightNipple = new Point(
-            form.getRightNippleX(),
-            form.getRightNippleY()
-        );
-        if (this.rightNipple.x == 0 && this.rightNipple.y == 0) {
-            this.rightNipple = null;
-        }
-    }
-
-    setLeftNipple(point) {
-        this.leftNipple = point;
-    }
-
-    setRightNipple(point) {
-        this.rightNipple = point;
+    constructor(leftNipple, rightNipple) {
+        this.leftNipple = leftNipple
+        this.rightNipple = rightNipple
     }
 
     getLeftNipple() {
-        return this.leftNipple;
+        return this.leftNipple
     }
 
     getRightNipple() {
         return this.rightNipple;
     }
+}
+
+function GetNipple(form) {
+    let ret = new Nipple(
+        new Point(form.getLeftNippleX(), form.getLeftNippleY()),
+        new Point(form.getRightNippleX(), form.getRightNippleY())
+    );
+    if (ret.leftNipple.x == 0 && ret.leftNipple.y == 0) {
+        ret.leftNipple = null;
+    }
+
+    if (ret.rightNipple.x == 0 && ret.rightNipple.y == 0) {
+        ret.rightNipple = null;
+    }
+    return ret
 }
 
 class Canvas {
@@ -102,18 +96,20 @@ class Form {
 }
 
 class ScreenDrawer {
-    constructor() {
+    constructor(canvas) {
         // photo init
         this.photoPath = document.getElementById("photo-path").value;
         this.img = new Image();
         this.img.src = this.photoPath;
+
+        this.canvas = canvas
     }
 
-    drawScreen(canvas, nipple) {
+    drawScreen(nipple) {
         // get canvas context
-        const ctx = canvas.getCtx();
+        const ctx = this.canvas.getCtx();
         // canvas reset
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
         // define draw process
         const drawProcess = () => {
             this.drawPhoto(ctx);
@@ -166,29 +162,26 @@ class ScreenDrawer {
 }
 
 class ClickHandler {
-    constructor() {
+    constructor(canvas, form) {
         // init screen drawer
-        this.screenDrawer = new ScreenDrawer();
+        this.screenDrawer = new ScreenDrawer(canvas);
+        this.form = form
     }
 
-    leftClickHandler(e, canvas, form, nipple) {
-        // set nipple value
-        nipple.setLeftNipple(new Point(e.offsetX, e.offsetY));
-        // screen update
-        this.screenDrawer.drawScreen(canvas, nipple);
+    leftClickHandler(e) {
         // set form value
-        form.setLeftNippleX(e.offsetX);
-        form.setLeftNippleY(e.offsetY);
+        this.form.setLeftNippleX(e.offsetX);
+        this.form.setLeftNippleY(e.offsetY);
+        // screen update
+        this.screenDrawer.drawScreen(GetNipple(this.form));
     }
 
-    rightClickHandler(e, canvas, form, nipple) {
-        // set nipple value
-        nipple.setRightNipple(new Point(e.offsetX, e.offsetY));
-        // screen update
-        this.screenDrawer.drawScreen(canvas, nipple);
+    rightClickHandler(e) {
         // set form value
-        form.setRightNippleX(e.offsetX);
-        form.setRightNippleY(e.offsetY);
+        this.form.setRightNippleX(e.offsetX);
+        this.form.setRightNippleY(e.offsetY);
+        // screen update
+        this.screenDrawer.drawScreen(GetNipple(this.form));
     }
 }
 
@@ -202,21 +195,20 @@ class Main {
         // init
         const canvas = new Canvas(this.canvasWidth, this.canvasHeight);
         const form = new Form();
-        const nipple = new Nipple(form);
 
         // set click handler
-        const clickHandler = new ClickHandler();
+        const clickHandler = new ClickHandler(canvas, form);
         canvas.getCanvas().addEventListener("click", (e) => {
-            clickHandler.leftClickHandler(e, canvas, form, nipple);
+            clickHandler.leftClickHandler(e);
         });
         canvas.getCanvas().addEventListener("contextmenu", (e) => {
             e.preventDefault();
-            clickHandler.rightClickHandler(e, canvas, form, nipple);
+            clickHandler.rightClickHandler(e);
         });
 
         // init screen
-        const screenDrawer = new ScreenDrawer();
-        screenDrawer.drawScreen(canvas, nipple);
+        const screenDrawer = new ScreenDrawer(canvas);
+        screenDrawer.drawScreen(GetNipple(form));
     }
 }
 
