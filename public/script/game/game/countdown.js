@@ -51,7 +51,6 @@ class CountDownDrawer {
         context.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
         const data = {
-            context: context,
             image: this.image,
             time: 0,
         };

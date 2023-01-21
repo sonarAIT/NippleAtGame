@@ -49,14 +49,16 @@ export class GameScreenDrawer {
         this.canvas = canvas;
     }
 
-    drawImage(ctx, image) {
+    drawImage(image) {
+        const ctx = this.canvas.getCtx()
         const height = this.canvas.height;
         const width = image.width * (height / image.height);
         const x = (this.canvas.width - width) / 2;
         ctx.drawImage(image, x, 0, width, height);
     }
 
-    drawTime(ctx, time) {
+    drawTime(time) {
+        const ctx = this.canvas.getCtx()
         ctx.fillStyle = "black";
         ctx.font = "48px serif";
 
@@ -73,8 +75,8 @@ export class GameScreenDrawer {
     }
 
     draw(data) {
-        this.drawImage(data.context, data.image);
-        this.drawTime(data.context, data.time);
+        this.drawImage(data.image);
+        this.drawTime(data.time);
     }
 }
 
